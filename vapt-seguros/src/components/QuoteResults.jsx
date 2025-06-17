@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Download, 
-  Phone, 
-  Mail, 
+import {
+  Download,
+  Phone,
+  Mail,
   Star,
   ArrowRight,
   Shield,
@@ -88,48 +88,37 @@ const QuoteResults = ({ quotes, onNewQuote, formData }) => {
 
   const handlePaymentNext = async (paymentData) => {
     try {
-      // Preparar dados para envio ao backend
-      const contractData = {
-        selectedQuote: contractFlow.selectedQuote,
-        additionalData: contractFlow.additionalData,
-        paymentData: paymentData
-      }
+      // Gerar um número de apólice provisório aleatório
+      const provisionalPolicyNumber = `PROV-${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`;
 
-      // Criar contrato no backend
-      const contractResult = await contractService.createContract(contractData)
-      
-      if (contractResult.success) {
-        // Enviar e-mail de confirmação
-        const emailData = {
-          contractData: {
-            ...contractResult.contract,
-            selectedQuote: contractFlow.selectedQuote
-          },
-          additionalData: contractFlow.additionalData,
-          paymentData: paymentData
-        }
+      // Simular dados do contrato para a tela de sucesso
+      const simulatedContractData = {
+        policy_number: provisionalPolicyNumber,
+        name: contractFlow.additionalData.name,
+        email: contractFlow.additionalData.email,
+        vehicle_brand: contractFlow.additionalData.brand,
+        vehicle_model: contractFlow.additionalData.model,
+        vehicle_year: contractFlow.additionalData.year,
+        insurance_company: contractFlow.selectedQuote.insurerName,
+        monthly_price: contractFlow.selectedQuote.monthlyPrice,
+        annual_price: contractFlow.selectedQuote.annualPrice,
+        coverage_type: contractFlow.selectedQuote.coverage,
+        // Adicione outros campos que a tela de sucesso possa precisar
+      };
 
-        try {
-          await contractService.sendConfirmationEmail(emailData)
-        } catch (emailError) {
-          console.warn('Erro ao enviar e-mail, mas contrato foi criado:', emailError)
-        }
+      // Atualizar estado com dados do contrato simulado
+      setContractFlow(prev => ({
+        ...prev,
+        step: 'success',
+        paymentData,
+        contractData: simulatedContractData
+      }));
 
-        // Atualizar estado com dados do contrato
-        setContractFlow(prev => ({
-          ...prev,
-          step: 'success',
-          paymentData,
-          contractData: contractResult.contract
-        }))
-      } else {
-        throw new Error('Falha ao criar contrato')
-      }
     } catch (error) {
-      console.error('Erro no processamento:', error)
-      alert(`Erro ao processar contratação: ${error.message}`)
+      console.error('Erro ao processar contratação simulada:', error);
+      alert(`Erro ao processar contratação simulada: ${error.message}`);
     }
-  }
+  };
 
   const handleBackToResults = () => {
     setContractFlow({
@@ -379,4 +368,3 @@ const QuoteResults = ({ quotes, onNewQuote, formData }) => {
 }
 
 export default QuoteResults
-
